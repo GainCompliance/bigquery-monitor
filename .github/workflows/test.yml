@@ -1,0 +1,39 @@
+name: Test
+on:
+  workflow_call:
+  push:
+    branches-ignore: [main]   # excludes master
+
+env:
+  GOOGLE_CLOUD_PROJECT: gain-data
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      emulator:
+        image: gcr.io/cloud-spanner-emulator/emulator:latest
+        ports:
+          - 9010:9010
+          - 9020:9020
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+
+      - name: Install pipenv
+        run: python -m pip install --upgrade pipenv wheel setuptools
+
+      - name: Install dependencies
+        env:
+          GEMFURY_TOKEN: ${{ secrets.GEMFURY_TOKEN }}
+        run: pipenv install --deploy --dev
+
+      - name: Run formatting check
+        run: |
+          pipenv run black --line-length=120 --check bigquery_monitor test
+          pipenv run flake8 bigquery_monitor test
+
+      - name: Test
+        run: pipenv run pytest

@@ -1,0 +1,2 @@
+# inherit all settings from .github repo
+_extends: .github

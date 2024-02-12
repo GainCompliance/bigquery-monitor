@@ -1,0 +1,7 @@
+requirements.txt
+
+# IDE Stuff
+__pycache__/
+.idea/
+*.iml
+.DS_Store
